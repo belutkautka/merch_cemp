@@ -19,7 +19,6 @@ const backet_click = () => {
     </button>
     <div class="money">RUB</div>
   </div>
-
 </template>
 
 <style scoped>
