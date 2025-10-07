@@ -1,0 +1,17 @@
+:root {
+    font-family: Proxima Nova, sans-serif;
+    letter-spacing: 0.03em;
+
+    --white: white;
+    --grey: #D4D4D4;
+    --text_grey: #555555;
+    --black: black;
+}
+
+body{
+    background-color: var(--grey);
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0 ;
+}
