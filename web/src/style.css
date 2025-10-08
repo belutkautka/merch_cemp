@@ -6,6 +6,7 @@
     --grey: #D4D4D4;
     --text_grey: #555555;
     --black: black;
+    --red: #FF2F00;
 }
 
 body{
@@ -14,4 +15,8 @@ body{
     justify-content: center;
     margin: 0;
     padding: 0 ;
+}
+
+img{
+    object-fit: contain;
 }

@@ -1,42 +1,150 @@
 <script setup lang="ts">
 import backet from "../../public/backet.png";
 import {useRouter} from "vue-router";
+import {products} from "../types/Data.ts"
+import {store} from "../store.js";
 
 const router = useRouter()
 
 const backet_click = () => {
   router.push({ name: 'Backet' })
 }
+
+const details_click = (id: number) => {
+  store.current_product = id
+  router.push({ name: 'ShopItem' })
+}
+
+const set_filter_click = (value: boolean|null) => {
+  store.filter = value
+}
 </script>
 
 <template>
   <div class="menu">
-    <button class="all">Все</button>
-    <button class="exist">В наличии</button>
-    <button class="wait">Предзаказ</button>
+    <button class="menu_button"
+            :class="{ selected: store.filter == null }"
+            @click="set_filter_click(null)
+    ">Все</button>
+    <button class="menu_button"
+            :class="{ selected: store.filter == true }"
+            @click="set_filter_click(true)">В наличии</button>
+    <button class="menu_button"
+            :class="{ selected: store.filter == false }"
+            @click="set_filter_click(false)">Предзаказ</button>
     <button class="backet" @click="backet_click">
       <img :src="backet" class="backet_icon" alt="bad bar"/>
     </button>
     <div class="money">RUB</div>
   </div>
+  <div class="shop">
+    <div class="shop_item"
+         v-for="(product, index) in products"
+         :key="index"
+         :product="product"
+         :index="index"
+
+         @click="details_click(index)"
+    >
+      <div class="shop_item_container" v-if="(store.filter==null)||store.filter==product.have">
+        <div class="shop_have" v-if="product.have">В наличии</div>
+        <div class="shop_not_have" v-if="!product.have">Предзаказ</div>
+        <img :src="product.image" alt="image" class="shop_item_img">
+        <div class="shop_item_info">
+          <p class="shop_item__name">{{product.name}}</p>
+          <p class="shop_item__money" v-if="store.money_type=='RUB'">{{product.priceRUB}}₽</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.shop_have{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+
+  background-color: var(--red);
+  color: var(--white);
+}
+
+.shop_item_container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.shop_not_have {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+
+  background-color: var(--grey);
+  color: var(--white);
+}
+
+.shop_item__money{
+  color: var(--red);
+  font-weight: bold;
+  font-family: PT Mono, sans-serif;
+}
+
+.shop_item__name{
+  font-weight: bold;
+}
+
+.shop_item_info{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 16px;
+}
+
+.shop_item_img{
+  height: 230px;
+  width: auto;
+  border-radius: 20px;
+  border: 1px solid var(--grey)
+}
+
+.shop_item{
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 12px;
+  position: relative;
+}
+
+.shop{
+  display: flex;
+  flex-direction: column;
+}
+
 .menu{
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
 
-button{
+.menu_button{
   font-size: 12px;
-  padding: 8px 20px;
+  padding: 1% 4%;
   border-radius: 22px;
   background-color: var(--white);
   border: 1px solid var(--grey);
 }
 
-.all{
+.menu_button.selected{
   background-color: var(--black);
   color: var(--white);
   border: 1px solid var(--black);
@@ -48,6 +156,10 @@ button{
 }
 
 .backet{
+  font-size: 12px;
+  border-radius: 22px;
+  background-color: var(--white);
+  border: 1px solid var(--grey);
   padding: 6px;
   padding-bottom: 2px;
 }
