@@ -12,11 +12,23 @@ const backet_click = () => {
 
 const details_click = (id: number) => {
   store.current_product = id
+  store.index = 0
+  store.index_size = 0
+  store.money_open = false
   router.push({ name: 'ShopItem' })
 }
 
 const set_filter_click = (value: boolean|null) => {
   store.filter = value
+}
+
+const open_money_types_click = () => {
+  store.money_open = !store.money_open
+}
+
+const change_money_type = (value: string) => {
+  store.money_type = value
+  store.money_open = false
 }
 </script>
 
@@ -35,7 +47,17 @@ const set_filter_click = (value: boolean|null) => {
     <button class="backet" @click="backet_click">
       <img :src="backet" class="backet_icon" alt="bad bar"/>
     </button>
-    <div class="money">RUB</div>
+    <div class="money" @click="open_money_types_click">
+      {{store.money_type}} ᨆ
+      <div class="other_money"
+           @click="change_money_type('RUB')"
+           v-if="(store.money_type != 'RUB') && (store.money_open)"
+      >RUB</div>
+      <div class="other_money"
+           @click="change_money_type('EUR')"
+           v-if="(store.money_type != 'EUR') && (store.money_open)"
+      >EUR</div>
+    </div>
   </div>
   <div class="shop">
     <div class="shop_item"
@@ -43,16 +65,18 @@ const set_filter_click = (value: boolean|null) => {
          :key="index"
          :product="product"
          :index="index"
-
-         @click="details_click(index)"
     >
-      <div class="shop_item_container" v-if="(store.filter==null)||store.filter==product.have">
+      <div class="shop_item_container"
+           v-if="(store.filter==null)||store.filter==product.have"
+           @click="details_click(product.id)"
+      >
         <div class="shop_have" v-if="product.have">В наличии</div>
         <div class="shop_not_have" v-if="!product.have">Предзаказ</div>
         <img :src="product.image" alt="image" class="shop_item_img">
         <div class="shop_item_info">
           <p class="shop_item__name">{{product.name}}</p>
           <p class="shop_item__money" v-if="store.money_type=='RUB'">{{product.priceRUB}}₽</p>
+          <p class="shop_item__money" v-if="store.money_type=='EUR'">{{product.priceEUR}}€</p>
         </div>
       </div>
     </div>
@@ -60,6 +84,15 @@ const set_filter_click = (value: boolean|null) => {
 </template>
 
 <style scoped>
+.other_money{
+  position: absolute;
+  top: 50px;
+  z-index: 1;
+  background-color: var(--grey);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
 .shop_have{
   position: absolute;
   top: 12px;
@@ -109,8 +142,8 @@ const set_filter_click = (value: boolean|null) => {
 }
 
 .shop_item_img{
-  height: 230px;
-  width: auto;
+  height: auto;
+  width: 100%;
   border-radius: 20px;
   border: 1px solid var(--grey)
 }
