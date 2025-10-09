@@ -51,11 +51,11 @@ const change_money_type = (value: string) => {
       {{store.money_type}} ᨆ
       <div class="other_money"
            @click="change_money_type('RUB')"
-           v-if="(store.money_type != 'RUB') && (store.money_open)"
+           v-if="(store.money_open) && (store.money_type != 'RUB')"
       >RUB</div>
       <div class="other_money"
            @click="change_money_type('EUR')"
-           v-if="(store.money_type != 'EUR') && (store.money_open)"
+           v-if="(store.money_open) && (store.money_type != 'EUR')"
       >EUR</div>
     </div>
   </div>

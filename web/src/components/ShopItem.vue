@@ -25,6 +25,7 @@ const open_money_types_click = () => {
 }
 
 const back_click = () => {
+  store.money_open = false
   router.back()
 }
 
