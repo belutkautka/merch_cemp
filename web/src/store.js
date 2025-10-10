@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 import {products} from "./types/Data.js";
 
 export const store = reactive({
-    money_type: "EUR",
+    money_type: "RUB",
     current_product: 0,
     filter: null,
     money_open: false,
@@ -11,5 +11,11 @@ export const store = reactive({
     //order
     rubaska_count: [0,0,0,0,0,0,0,0],
     rain_count: [0,0],
-    flyaga_count: [0,0,0]
+    flyaga_count: [0,0,0],
+
+    // Доставка
+    delivery_type: "Кэмп",
+    delivery_open: false,
+    selected_delivery_id: "camp",
+    delivery_price: 0,
 })

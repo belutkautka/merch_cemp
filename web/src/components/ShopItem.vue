@@ -41,6 +41,9 @@ const add_to_backet_click = () => {
   } else if (product.id == 0) {
     store.flyaga_count[store.index_size] += 1
   }
+
+  // Переход в корзину после добавления товара
+  router.push({ name: 'Backet' })
 }
 
 </script>
