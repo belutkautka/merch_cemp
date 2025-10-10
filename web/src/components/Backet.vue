@@ -3,6 +3,15 @@ import {store} from "../store.js";
 import {products} from "../types/Data.ts";
 import {useRouter} from "vue-router";
 import trash from "../../public/trash.svg";
+import type Product from "../types/Product.ts";
+
+interface BacketItem {
+  product: Product;
+  variant: string;
+  count: number;
+  productIndex: number;
+  variantIndex: number;
+}
 
 const router = useRouter()
 
@@ -24,16 +33,16 @@ const open_delivery_click = () => {
 }
 
 // Получить все товары в корзине
-const getBacketItems = () => {
-  const items = []
+const getBacketItems = (): BacketItem[] => {
+  const items: BacketItem[] = []
 
   // Рубашка
-  products[1].sizes?.forEach((size, index) => {
-    if (store.rubaska_count[index] > 0) {
+  products[1]?.sizes?.forEach((size, index) => {
+    if (store.rubaska_count[index]! > 0) {
       items.push({
-        product: products[1],
+        product: products[1]!,
         variant: size,
-        count: store.rubaska_count[index],
+        count: store.rubaska_count[index]!,
         productIndex: 1,
         variantIndex: index
       })
@@ -41,12 +50,12 @@ const getBacketItems = () => {
   })
 
   // Дождевик
-  products[2].sizes?.forEach((size, index) => {
-    if (store.rain_count[index] > 0) {
+  products[2]?.sizes?.forEach((size, index) => {
+    if (store.rain_count[index]! > 0) {
       items.push({
-        product: products[2],
+        product: products[2]!,
         variant: size,
-        count: store.rain_count[index],
+        count: store.rain_count[index]!,
         productIndex: 2,
         variantIndex: index
       })
@@ -54,12 +63,12 @@ const getBacketItems = () => {
   })
 
   // Фляга
-  products[0].types?.forEach((type, index) => {
-    if (store.flyaga_count[index] > 0) {
+  products[0]?.types?.forEach((type, index) => {
+    if (store.flyaga_count[index]! > 0) {
       items.push({
-        product: products[0],
+        product: products[0]!,
         variant: type,
-        count: store.flyaga_count[index],
+        count: store.flyaga_count[index]!,
         productIndex: 0,
         variantIndex: index
       })
@@ -72,11 +81,11 @@ const getBacketItems = () => {
 // Изменить количество товара
 const changeCount = (productIndex: number, variantIndex: number, delta: number) => {
   if (productIndex === 1) {
-    store.rubaska_count[variantIndex] = Math.max(0, store.rubaska_count[variantIndex] + delta)
+    store.rubaska_count[variantIndex] = Math.max(0, store.rubaska_count[variantIndex]! + delta)
   } else if (productIndex === 2) {
-    store.rain_count[variantIndex] = Math.max(0, store.rain_count[variantIndex] + delta)
+    store.rain_count[variantIndex] = Math.max(0, store.rain_count[variantIndex]! + delta)
   } else if (productIndex === 0) {
-    store.flyaga_count[variantIndex] = Math.max(0, store.flyaga_count[variantIndex] + delta)
+    store.flyaga_count[variantIndex] = Math.max(0, store.flyaga_count[variantIndex]! + delta)
   }
 }
 
@@ -92,10 +101,10 @@ const removeItem = (productIndex: number, variantIndex: number) => {
 }
 
 // Подсчет итоговой суммы
-const getTotalPrice = () => {
+const getTotalPrice = (): number => {
   const items = getBacketItems()
   return items.reduce((sum, item) => {
-    const price = store.money_type === 'RUB' ? item.product.priceRUB : item.product.priceEUR
+    const price = store.money_type === 'RUB' ? item.product!.priceRUB : item.product!.priceEUR
     return sum + price * item.count
   }, 0)
 }
@@ -180,10 +189,6 @@ const getDeliveryDescription = () => {
         <span v-else>?{{getCurrency()}}</span>
       </div>
     </div>
-
-    <button class="donate_btn">
-      Хочу задонатить Бару!
-    </button>
 
     <button class="pay_btn">
       К оплате
@@ -384,20 +389,6 @@ const getDeliveryDescription = () => {
   font-weight: bold;
   font-size: 18px;
   margin-top: 8px;
-}
-
-.donate_btn {
-  width: 100%;
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 22px;
-  border: none;
-  background-color: var(--white);
-  color: var(--red);
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  border: 2px solid var(--red);
 }
 
 .pay_btn {

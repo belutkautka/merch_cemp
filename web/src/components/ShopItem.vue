@@ -2,9 +2,10 @@
 import {store} from "../store.js";
 import {products} from "../types/Data.ts";
 import {useRouter} from "vue-router";
+import {ref} from "vue";
 const router = useRouter()
 
-let product = products[store.current_product]
+let product = products[store.current_product]!
 let len = product.images.length;
 
 const change_money_type = (value: string) => {
@@ -33,13 +34,24 @@ const change_index_size_click = (index: number) => {
   store.index_size = index
 }
 
+const types_open = ref(false)
+
+const toggle_types = () => {
+  types_open.value = !types_open.value
+}
+
+const select_type = (index: number) => {
+  store.index_size = index
+  types_open.value = false
+}
+
 const add_to_backet_click = () => {
-  if (product.id == 1) {
-    store.rubaska_count[store.index_size] += 1
-  } else if (product.id == 2) {
-    store.rain_count[store.index_size] += 1
-  } else if (product.id == 0) {
-    store.flyaga_count[store.index_size] += 1
+  if (product?.id == 1) {
+    store.rubaska_count[store.index_size] = (store.rubaska_count[store.index_size] || 0) + 1
+  } else if (product?.id == 2) {
+    store.rain_count[store.index_size] = (store.rain_count[store.index_size] || 0) + 1
+  } else if (product?.id == 0) {
+    store.flyaga_count[store.index_size] = (store.flyaga_count[store.index_size] || 0) + 1
   }
 
   // Переход в корзину после добавления товара
@@ -99,12 +111,22 @@ const add_to_backet_click = () => {
           {{size}}
         </div>
       </div>
-      <div class="types"
+      <div class="types_dropdown"
            v-if="product.types!=null"
       >
-        <div class="type">
+        <div class="types_selected" @click="toggle_types">
           <div>{{product.types[store.index_size]}}</div>
-          <div class="sign">ᨆ</div>
+          <div class="types_arrow">{{types_open ? '▲' : '▼'}}</div>
+        </div>
+        <div class="types_list" v-if="types_open">
+          <div class="types_option"
+               v-for="(type, index) in product.types"
+               :key="index"
+               :class="{ active: store.index_size == index}"
+               @click="select_type(index)"
+          >
+            {{type}}
+          </div>
         </div>
       </div>
       <div class="button" @click="add_to_backet_click()">
@@ -115,16 +137,59 @@ const add_to_backet_click = () => {
 </template>
 
 <style scoped>
-.type{
-  color: var(--grey_desc);
-  width: calc(100% - 40px);
-  padding: 8px 20px;
+.types_dropdown{
+  position: relative;
+}
+
+.types_selected {
+  padding: 12px 20px;
   border: 1px solid var(--grey);
   font-size: 12px;
-  justify-content: space-between;
-  display: flex;
-  flex-direction: row;
   border-radius: 22px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--white);
+}
+
+.types_arrow {
+  color: var(--text_grey);
+  font-size: 12px;
+}
+
+.types_list {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 8px;
+  background-color: var(--white);
+  border: 1px solid var(--grey);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.types_option {
+  padding: 12px 20px;
+  font-size: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--grey);
+}
+
+.types_option:last-child {
+  border-bottom: none;
+}
+
+.types_option:hover {
+  background-color: #f5f5f5;
+}
+
+.types_option.active {
+  background-color: var(--grey);
+  font-weight: bold;
 }
 
 .button{

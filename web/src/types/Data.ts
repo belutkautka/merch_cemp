@@ -20,8 +20,8 @@ export const products: Product[] = [
         have: true,
     },{
         id:1,
-        image: "rubashka_main.png",
-        images: ["rubashka1.png"],
+        image: "rubashka_main.jpg",
+        images: ["rubashka1.jpg", "rubashka2.jpg", "rubashka3.jpg", "rubashka4.jpg", "rubashka5.jpg", "rubashka6.jpg", "rubashka7.jpg", "rubashka8.jpg", "rubashka9.jpg", "rubashka10.jpg", "rubashka11.jpg", "rubashka12.jpg", "rubashka13.jpg"],
         name: "Рубашка BAD BAR",
         description: ["Новая форма бара. Рваная, тёплая, свободная.",
         "Может стать лёгкой курткой на осень/весну, или тёплой рубашкой поверх футболки.",
