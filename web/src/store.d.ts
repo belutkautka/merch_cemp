@@ -6,7 +6,8 @@ export const store: {
     index: number;
     index_size: number;
     rubaska_count: number[];
-    rain_count: number[];
+    rain_ML_count: number[];
+    rain_XLXXL_count: number[];
     flyaga_count: number[];
     delivery_type: string;
     delivery_open: boolean;

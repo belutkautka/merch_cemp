@@ -10,7 +10,8 @@ export const store = reactive({
     index_size: 0,
     //order
     rubaska_count: [0,0,0,0,0,0,0,0],
-    rain_count: [0,0],
+    rain_ML_count: [0],
+    rain_XLXXL_count: [0],
     flyaga_count: [0,0,0],
 
     // Доставка

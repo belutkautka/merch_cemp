@@ -49,14 +49,27 @@ const getBacketItems = (): BacketItem[] => {
     }
   })
 
-  // Дождевик
+  // Дождевик M/L
   products[2]?.sizes?.forEach((size, index) => {
-    if (store.rain_count[index]! > 0) {
+    if (store.rain_ML_count[index]! > 0) {
       items.push({
         product: products[2]!,
         variant: size,
-        count: store.rain_count[index]!,
+        count: store.rain_ML_count[index]!,
         productIndex: 2,
+        variantIndex: index
+      })
+    }
+  })
+
+  // Дождевик XL/XXL
+  products[3]?.sizes?.forEach((size, index) => {
+    if (store.rain_XLXXL_count[index]! > 0) {
+      items.push({
+        product: products[3]!,
+        variant: size,
+        count: store.rain_XLXXL_count[index]!,
+        productIndex: 3,
         variantIndex: index
       })
     }
@@ -80,23 +93,27 @@ const getBacketItems = (): BacketItem[] => {
 
 // Изменить количество товара
 const changeCount = (productIndex: number, variantIndex: number, delta: number) => {
-  if (productIndex === 1) {
+  if (productIndex === 0) {
+    store.flyaga_count[variantIndex] = Math.max(0, store.flyaga_count[variantIndex]! + delta)
+  } else if (productIndex === 1) {
     store.rubaska_count[variantIndex] = Math.max(0, store.rubaska_count[variantIndex]! + delta)
   } else if (productIndex === 2) {
-    store.rain_count[variantIndex] = Math.max(0, store.rain_count[variantIndex]! + delta)
-  } else if (productIndex === 0) {
-    store.flyaga_count[variantIndex] = Math.max(0, store.flyaga_count[variantIndex]! + delta)
+    store.rain_ML_count[variantIndex] = Math.max(0, store.rain_ML_count[variantIndex]! + delta)
+  } else if (productIndex === 3) {
+    store.rain_XLXXL_count[variantIndex] = Math.max(0, store.rain_XLXXL_count[variantIndex]! + delta)
   }
 }
 
 // Удалить товар
 const removeItem = (productIndex: number, variantIndex: number) => {
-  if (productIndex === 1) {
+  if (productIndex === 0) {
+    store.flyaga_count[variantIndex] = 0
+  } else if (productIndex === 1) {
     store.rubaska_count[variantIndex] = 0
   } else if (productIndex === 2) {
-    store.rain_count[variantIndex] = 0
-  } else if (productIndex === 0) {
-    store.flyaga_count[variantIndex] = 0
+    store.rain_ML_count[variantIndex] = 0
+  } else if (productIndex === 3) {
+    store.rain_XLXXL_count[variantIndex] = 0
   }
 }
 
@@ -124,6 +141,41 @@ const getDeliveryDescription = () => {
     default:
       return 'Сколько-то денег, рассчитаем позже и напишем цену'
   }
+}
+
+// Отправка заказа в Telegram бота
+const handlePayClick = () => {
+  const data = {
+    order: {
+      // Фляга - 3 типа
+      flyaga_bad_bar: store.flyaga_count[0] || 0,
+      flyaga_horse: store.flyaga_count[1] || 0,
+      flyaga_rectal: store.flyaga_count[2] || 0,
+
+      // Рубашка - 8 размеров
+      rubashka_S: store.rubaska_count[0] || 0,
+      rubashka_M: store.rubaska_count[1] || 0,
+      rubashka_L: store.rubaska_count[2] || 0,
+      rubashka_XL: store.rubaska_count[3] || 0,
+      rubashka_2XL: store.rubaska_count[4] || 0,
+      rubashka_3XL: store.rubaska_count[5] || 0,
+      rubashka_4XL: store.rubaska_count[6] || 0,
+      rubashka_5XL: store.rubaska_count[7] || 0,
+
+      // Дождевик M/L
+      rain_M_L: store.rain_ML_count[0] || 0,
+
+      // Дождевик XL/XXL
+      rain_XL_XXL: store.rain_XLXXL_count[0] || 0,
+    },
+    delivery: store.delivery_type,
+    delivery_id: store.selected_delivery_id,
+    currency: store.money_type,
+    total_price: getTotalPrice(),
+  }
+
+  window.Telegram.WebApp.sendData(JSON.stringify(data))
+  window.Telegram.WebApp.close()
 }
 </script>
 
@@ -181,16 +233,16 @@ const getDeliveryDescription = () => {
       <div class="summary_row">
         <span>Доставка:</span>
         <span v-if="store.selected_delivery_id === 'camp'">0{{getCurrency()}}</span>
-        <span v-else>?{{getCurrency()}}</span>
+        <span v-else>X{{getCurrency()}}</span>
       </div>
       <div class="summary_row total">
         <span>Итого:</span>
         <span v-if="store.selected_delivery_id === 'camp'">{{formatPrice(getTotalPrice())}}{{getCurrency()}}</span>
-        <span v-else>?{{getCurrency()}}</span>
+        <span v-else>{{formatPrice(getTotalPrice())}}{{getCurrency()}} + X{{getCurrency()}}</span>
       </div>
     </div>
 
-    <button class="pay_btn">
+    <button class="pay_btn" @click="handlePayClick">
       К оплате
     </button>
   </div>

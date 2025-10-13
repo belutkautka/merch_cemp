@@ -46,12 +46,14 @@ const select_type = (index: number) => {
 }
 
 const add_to_backet_click = () => {
-  if (product?.id == 1) {
+  if (product?.id == 0) {
+    store.flyaga_count[store.index_size] = (store.flyaga_count[store.index_size] || 0) + 1
+  } else if (product?.id == 1) {
     store.rubaska_count[store.index_size] = (store.rubaska_count[store.index_size] || 0) + 1
   } else if (product?.id == 2) {
-    store.rain_count[store.index_size] = (store.rain_count[store.index_size] || 0) + 1
-  } else if (product?.id == 0) {
-    store.flyaga_count[store.index_size] = (store.flyaga_count[store.index_size] || 0) + 1
+    store.rain_ML_count[store.index_size] = (store.rain_ML_count[store.index_size] || 0) + 1
+  } else if (product?.id == 3) {
+    store.rain_XLXXL_count[store.index_size] = (store.rain_XLXXL_count[store.index_size] || 0) + 1
   }
 
   // Переход в корзину после добавления товара
