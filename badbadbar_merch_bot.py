@@ -22,19 +22,21 @@ import tasks
 # ORDER STATES: CANCELED
 
 RUB_IN_EUR = 100
+GIFT_PACKAGING_PRICE = 300
 
 PRICES = {
     "flyaga_bad_bar": 3000,
     "flyaga_horse": 3000,
     "flyaga_rectal": 3000,
-    "rubashka_S": 8000,
-    "rubashka_M": 8000,
-    "rubashka_L": 8000,
-    "rubashka_XL": 8000,
-    "rubashka_2XL": 8000,
-    "rubashka_3XL": 8000,
-    "rubashka_4XL": 8000,
-    "rubashka_5XL": 8000,
+    "rubashka_42": 8000,
+    "rubashka_44": 8000,
+    "rubashka_46": 8000,
+    "rubashka_48": 8000,
+    "rubashka_50": 8000,
+    "rubashka_52": 8000,
+    "rubashka_54": 8000,
+    "rubashka_56": 8000,
+    "rubashka_58": 8000,
     "rain_M_L": 5000,
     "rain_XL_XXL": 5000,
 }
@@ -43,14 +45,15 @@ NAMES = {
     "flyaga_bad_bar": "фляга с тегом bad bar",
     "flyaga_horse": "фляга с конём",
     "flyaga_rectal": "фляга rectal use only",
-    "rubashka_S": "рубашка S",
-    "rubashka_M": "рубашка M",
-    "rubashka_L": "рубашка L",
-    "rubashka_XL": "рубашка XL",
-    "rubashka_2XL": "рубашка 2XL",
-    "rubashka_3XL": "рубашка 3XL",
-    "rubashka_4XL": "рубашка 4XL",
-    "rubashka_5XL": "рубашка 5XL",
+    "rubashka_42": "рубашка 42",
+    "rubashka_44": "рубашка 44",
+    "rubashka_46": "рубашка 46",
+    "rubashka_48": "рубашка 48",
+    "rubashka_50": "рубашка 50",
+    "rubashka_52": "рубашка 52",
+    "rubashka_54": "рубашка 54",
+    "rubashka_56": "рубашка 56",
+    "rubashka_58": "рубашка 58",
     "rain_M_L": "дождевик M-L",
     "rain_XL_XXL": "дождевик XL-XXL",
 }
@@ -59,7 +62,7 @@ orders = baydb.BayDB("orders.json", indexes=["status", "user_id"])
 
 application = None
 
-ADMINS = [53684567]
+ADMINS = [53684567, 117711124, 329347, 116563916]
 
 #, 5068140821, 117711124, 1813518716, 1035477903, 321169743]
 
@@ -106,6 +109,10 @@ def calculate_order_price(order_items):
                 return -1
             ans += PRICES[item] * num
 
+        # Добавляем стоимость подарочной упаковки
+        if order_items.get("gift_packaging"):
+            ans += GIFT_PACKAGING_PRICE
+
         if total_price != ans:
             return -1
 
@@ -131,6 +138,8 @@ def format_user_name(user):
 def get_readable_order_details(order):
     order_details = []
     order_items = order.get("order", {})
+    rubashka_height = order_items.get("rubashka_height", "")
+
     for item, num in order_items.get("order", {}).items():
         if num == 0:
             continue
@@ -139,9 +148,62 @@ def get_readable_order_details(order):
         else:
             suffix = f" х {num}"
 
-        order_details.append(NAMES.get(item, "неизвестно")+suffix)
+        item_name = NAMES.get(item, "неизвестно")
+        # Добавляем рост для рубашки
+        if item.startswith("rubashka_") and rubashka_height:
+            item_name += f" (рост {rubashka_height})"
+        order_details.append(item_name + suffix)
     order_details = ", ".join(order_details)
     return order_details
+
+
+def format_delivery_details(order_items):
+    """Форматирует детали доставки для отображения"""
+    delivery_type = order_items.get("delivery", "Не указано")
+    delivery_id = order_items.get("delivery_id", "")
+    delivery_details = order_items.get("delivery_details", {})
+
+    lines = [f"<b>Доставка:</b> {delivery_type}"]
+
+    if delivery_id == "pvz":
+        if delivery_details.get("city"):
+            lines.append(f"Город: {delivery_details['city']}")
+        if delivery_details.get("pvz_link"):
+            lines.append(f"ПВЗ: {delivery_details['pvz_link']}")
+        if delivery_details.get("recipient_name"):
+            lines.append(f"ФИО: {delivery_details['recipient_name']}")
+        if delivery_details.get("recipient_phone"):
+            lines.append(f"Тел: {delivery_details['recipient_phone']}")
+
+    elif delivery_id == "courier_ekb":
+        if delivery_details.get("recipient_name"):
+            lines.append(f"ФИО: {delivery_details['recipient_name']}")
+        if delivery_details.get("address"):
+            lines.append(f"Адрес: {delivery_details['address']}")
+        if delivery_details.get("comment"):
+            lines.append(f"Комментарий: {delivery_details['comment']}")
+
+    elif delivery_id == "worldwide":
+        if delivery_details.get("recipient_name"):
+            lines.append(f"ФИО: {delivery_details['recipient_name']}")
+        if delivery_details.get("country"):
+            lines.append(f"Страна: {delivery_details['country']}")
+        if delivery_details.get("city"):
+            lines.append(f"Город: {delivery_details['city']}")
+        if delivery_details.get("zip"):
+            lines.append(f"Индекс: {delivery_details['zip']}")
+        if delivery_details.get("address"):
+            lines.append(f"Адрес: {delivery_details['address']}")
+        if delivery_details.get("phone"):
+            lines.append(f"Тел: {delivery_details['phone']}")
+        if delivery_details.get("comment"):
+            lines.append(f"Комментарий: {delivery_details['comment']}")
+
+    elif delivery_id == "other":
+        if delivery_details.get("comment"):
+            lines.append(f"Комментарий: {delivery_details['comment']}")
+
+    return "\n".join(lines)
 
 
 def format_order_details(order, include_timestamp=True, for_admins=False):
@@ -178,7 +240,18 @@ def format_order_details(order, include_timestamp=True, for_admins=False):
 
     # message += f"Статус: {status}\n"
     message += f"Детали: {order_details}\n"
-    message += f"Сумма: {total_price} ₽ (или {total_price_eur} €).\n\n"
+
+    # Подарочная упаковка
+    if order_items.get("gift_packaging"):
+        message += f"🎁 Подарочная упаковка: +{GIFT_PACKAGING_PRICE} ₽\n"
+        recipient = order_items.get("recipient", "")
+        if recipient:
+            message += f"Получатель: {recipient}\n"
+
+    message += f"Сумма: {total_price} ₽ (или {total_price_eur} €).\n"
+
+    # Детали доставки
+    message += format_delivery_details(order_items) + "\n\n"
 
     keyboard = None
 
@@ -210,7 +283,7 @@ def format_order_details(order, include_timestamp=True, for_admins=False):
                 InlineKeyboardButton("🎟 Оплатить", callback_data=f"pay_{order_id}")
             ]]
         elif status == "WAITING_PAYMENT":
-            message += f"Совершая перевод, ты подтверждаешь, что ознакомлен(а) с описанием товаров и понимаешь: мерч нельзя вернуть или обменять, ведь мы делаем его специально под заказ 🎁\n\nhttps://www.tbank.ru/cf/2eOMJ7HDzYa\n\nВ описании платежа укажи «<b>{order_user_nick}</b>», чтобы мы знали от кого он."
+            message += f"Совершая перевод, ты подтверждаешь, что ознакомлен(а) с описанием товаров и понимаешь: мерч нельзя вернуть или обменять, ведь мы делаем его специально под заказ 🎁\n\n₽: https://www.tbank.ru/cf/2eOMJ7HDzYa\n€: https://revolut.me/glebthebread\n\nВ описании платежа укажи «<b>{order_user_nick}</b>», чтобы мы знали от кого он."
             keyboard = [[
                 InlineKeyboardButton("🔙 Назад", callback_data=f"back_to_new_{order_id}"),
                 InlineKeyboardButton("💸 Оплатил", callback_data=f"paid_{order_id}")
@@ -223,7 +296,7 @@ def format_order_details(order, include_timestamp=True, for_admins=False):
         elif status == "PAID":
             message += f"Заказ оплачен. Мы напишем, когда его можно будет забрать 📦."
         elif status == "READY":
-            message += f"Код получения <b>{order.get("code", "НЕТ")}</b>.\n\nПишите <a href='https://t.me/IamALENO4KA'>Алёне</a>. С ней можно договориться о самовывозе, курьере за счёт получателя или другом способе"
+            message += f"Код получения <b>{order.get("code", "НЕТ")}</b>.\n\nЗабирай мерч у @callmekoo, найди его или напиши ему"
         elif status == "DONE":
             message += f"Заказ выдан"
 
@@ -592,7 +665,7 @@ def generate_orders_csv():
     writer = csv.writer(csv_buffer)
 
     # Заголовки столбцов
-    headers = ["Номер", "Заказ", "Статус", "Пользователь", "Имя пользователя", "Стоимость", "Дата создания", "Код получения"]
+    headers = ["Номер", "Заказ", "Подарок", "Статус", "Пользователь", "Имя пользователя", "Стоимость", "Доставка", "Адрес/ПВЗ", "ФИО получателя", "Телефон", "Дата создания", "Код получения"]
     writer.writerow(headers)
 
     # Получаем все заказы
@@ -645,8 +718,47 @@ def generate_orders_csv():
 
             code = order.get("code", "")
 
+            # Данные о подарке и доставке
+            order_data = order.get("order", {})
+            is_gift = "Да" if order_data.get("gift_packaging") else ""
+            delivery_type = order_data.get("delivery", "")
+            delivery_details = order_data.get("delivery_details", {})
+
+            # Извлекаем адрес/ПВЗ в зависимости от типа доставки
+            address = ""
+            recipient_name = ""
+            recipient_phone = ""
+
+            delivery_id = order_data.get("delivery_id", "")
+            if delivery_id == "pvz":
+                city = delivery_details.get("city", "")
+                pvz_link = delivery_details.get("pvz_link", "")
+                address = f"{city}, {pvz_link}" if city else pvz_link
+                recipient_name = delivery_details.get("recipient_name", "")
+                recipient_phone = delivery_details.get("recipient_phone", "")
+            elif delivery_id == "courier_ekb":
+                address = delivery_details.get("address", "")
+                if delivery_details.get("comment"):
+                    address += f" ({delivery_details['comment']})"
+                recipient_name = delivery_details.get("recipient_name", "")
+            elif delivery_id == "worldwide":
+                parts = []
+                if delivery_details.get("country"):
+                    parts.append(delivery_details["country"])
+                if delivery_details.get("city"):
+                    parts.append(delivery_details["city"])
+                if delivery_details.get("zip"):
+                    parts.append(delivery_details["zip"])
+                if delivery_details.get("address"):
+                    parts.append(delivery_details["address"])
+                address = ", ".join(parts)
+                recipient_name = delivery_details.get("recipient_name", "")
+                recipient_phone = delivery_details.get("phone", "")
+            elif delivery_id == "other":
+                address = delivery_details.get("comment", "")
+
             # Записываем строку
-            writer.writerow([order_id, order_items, status, user_nick, user_name, total_price, create_time_ekb, code])
+            writer.writerow([order_id, order_items, is_gift, status, user_nick, user_name, total_price, delivery_type, address, recipient_name, recipient_phone, create_time_ekb, code])
 
             for item, count in order["order"]["order"].items():
                 if item not in sum_of_orders:
@@ -658,7 +770,7 @@ def generate_orders_csv():
 
         writer.writerow([
             "СУММА", get_readable_order_details({"order":{"order": sum_of_orders}}),
-            "", "", "", sum_price
+            "", "", "", "", sum_price, "", "", "", "", "", ""
             ])
 
 

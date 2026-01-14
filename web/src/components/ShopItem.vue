@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {store} from "../store.js";
-import {products} from "../types/Data.ts";
+import {products, sizeToHeight, heights} from "../types/Data.ts";
 import {useRouter} from "vue-router";
 import {ref} from "vue";
 const router = useRouter()
 
-let product = products[store.current_product]!
+// Поиск товара по ID вместо индекса массива
+let product = products.find(p => p.id === store.current_product)!
 let len = product.images.length;
 
 const change_money_type = (value: string) => {
@@ -32,6 +33,17 @@ const back_click = () => {
 
 const change_index_size_click = (index: number) => {
   store.index_size = index
+  // Для рубашки автоматически подставляем рост
+  if (product?.id == 1 && product.sizes) {
+    const size = product.sizes[index]
+    if (size && sizeToHeight[size]) {
+      store.selected_height = sizeToHeight[size]
+    }
+  }
+}
+
+const change_height_click = (height: string) => {
+  store.selected_height = height
 }
 
 const types_open = ref(false)
@@ -92,10 +104,8 @@ const add_to_backet_click = () => {
            :key="index"
            :desc="desc"
            :index="index"
-      >
-        {{desc}}
-        <br v-if="desc==''"/>
-      </div>
+           v-html="desc || '<br/>'"
+      ></div>
     </div>
     <div class="footer">
       <div
@@ -111,6 +121,17 @@ const add_to_backet_click = () => {
              @click="change_index_size_click(index)"
         >
           {{size}}
+        </div>
+      </div>
+      <div class="heights" v-if="product.id == 1">
+        <span class="heights_label">Рост:</span>
+        <div class="height"
+             v-for="height in heights"
+             :key="height"
+             :class="{ selected: store.selected_height == height}"
+             @click="change_height_click(height)"
+        >
+          {{height}}
         </div>
       </div>
       <div class="types_dropdown"
@@ -219,6 +240,34 @@ const add_to_backet_click = () => {
 }
 
 .size.selected {
+  background-color: var(--black);
+  color: white;
+  border: 1px solid var(--black);
+}
+
+.heights{
+  display: flex;
+  flex-direction: row;
+  gap: 1%;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.heights_label{
+  font-size: 12px;
+  color: var(--text_grey);
+  margin-right: 5px;
+}
+
+.height{
+  padding: 2% 6px;
+  border-radius: 22px;
+  border: 1px solid var(--grey);
+  font-size: 11px;
+}
+
+.height.selected {
   background-color: var(--black);
   color: white;
   border: 1px solid var(--black);
